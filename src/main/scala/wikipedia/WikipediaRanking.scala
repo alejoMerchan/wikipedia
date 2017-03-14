@@ -67,7 +67,8 @@ object WikipediaRanking {
    *   Note: this operation is long-running. It can potentially run for
    *   several seconds.
    */
-  def rankLangsUsingIndex(index: RDD[(String, Iterable[WikipediaArticle])]): List[(String, Int)] = ???
+  def rankLangsUsingIndex(index: RDD[(String, Iterable[WikipediaArticle])]): List[(String, Int)] =
+    index.map( y => (y._1,y._2.size)).collect().toList.sortWith((x,y) => x._2 > y._2)
 
   /* (3) Use `reduceByKey` so that the computation of the index and the ranking is combined.
    *     Can you notice an improvement in performance compared to measuring *both* the computation of the index
@@ -76,7 +77,9 @@ object WikipediaRanking {
    *   Note: this operation is long-running. It can potentially run for
    *   several seconds.
    */
-  def rankLangsReduceByKey(langs: List[String], rdd: RDD[WikipediaArticle]): List[(String, Int)] = ???
+  def rankLangsReduceByKey(langs: List[String], rdd: RDD[WikipediaArticle]): List[(String, Int)] =
+    sc.parallelize(langs.
+      map(x => (x,rdd.filter(y => y.text.split(" ").contains(x)).collect().size))).reduceByKey(_ + _).collect().toList.sortWith((x,y) => x._2 > y._2)
 
   def main(args: Array[String]) {
 

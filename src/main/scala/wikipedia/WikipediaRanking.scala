@@ -25,7 +25,24 @@ object WikipediaRanking {
    *  Hint3: the only whitespaces are blanks " "
    *  Hint4: no need to search in the title :)
    */
-  def occurrencesOfLang(lang: String, rdd: RDD[WikipediaArticle]): Int = ???
+  def occurrencesOfLang(lang: String, rdd: RDD[WikipediaArticle]): Int = {
+    /**
+      * Utilizacion del metodo aggregate: el metodo aggregate permite agregar dos diferentes funciones
+      * de reduccion al RDD.
+      *
+      * la primera funcion toma cada elemento del rdd(y), al text de dicho elemento le hace un split
+      * por cada espacio en blanco y luego en el array resultante valida si contiene el atributo lang.
+      * Si contiene el atributo lang va acumulando un + 1 en x, si no lo tiene solo retorna el acumulado.
+      *
+      * la siguiente subfuncion suma todos los acumulados.
+      *
+      * Nota: el zeroValue (aggregate[U: ClassTag](zeroValue: U)) es el valor inicial del acumulado
+      * y se suma tambien en la funcion final.
+      *
+      * Nota2: la evaluacion es acumulativa dependiendo de las particiones que se utilicen, en este caso 1.
+      */
+    rdd.aggregate(0)((x,y) => if(y.text.split(" ").contains(lang))x + 1 else x, (x,y) => x + y)
+  }
 
   /* (1) Use `occurrencesOfLang` to compute the ranking of the languages
    *     (`val langs`) by determining the number of Wikipedia articles that

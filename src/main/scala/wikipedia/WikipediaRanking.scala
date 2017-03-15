@@ -59,7 +59,7 @@ object WikipediaRanking {
    * to the Wikipedia pages in which it occurs.
    */
   def makeIndex(langs: List[String], rdd: RDD[WikipediaArticle]): RDD[(String, Iterable[WikipediaArticle])] =
-    sc.parallelize(langs.map(lang => (lang , rdd.filter(wikiArticle => wikiArticle.text.split(" ").contains(lang)).collect().toIterable)))
+    langs.map(y => rdd.filter(x => x.text.split(" ").contains(y)).groupBy(z => y)).reduce(_ union _).sortBy(y => y._2.size,ascending = false)
 
   /* (2) Compute the language ranking again, but now using the inverted index. Can you notice
    *     a performance improvement?
